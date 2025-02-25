@@ -1,0 +1,6 @@
+[
+    {"id": 1, "name": "Wireless Earbuds", "category": "Tech", "price": 49.99, "desc": "Bluetooth 5.0, 20h battery life"},
+    {"id": 2, "name": "Smartwatch", "category": "Tech", "price": 129.99, "desc": "Fitness tracking, waterproof"},
+    {"id": 3, "name": "Leather Jacket", "category": "Fashion", "price": 89.99, "desc": "Genuine leather, slim fit"},
+    {"id": 4, "name": "LED Desk Lamp", "category": "Home", "price": 29.99, "desc": "Adjustable brightness, USB charging"}
+  ]

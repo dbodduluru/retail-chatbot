@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Retail Chatbot</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; }
+        #chatbox { height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 15px; background: #f9f9f9; }
+        #chatbox p { margin: 5px 0; }
+        #input-area { margin-top: 10px; display: flex; gap: 10px; }
+        #input { flex-grow: 1; padding: 8px; font-size: 16px; }
+        button { padding: 8px 15px; background: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .waiting { color: #666; font-style: italic; }
+    </style>
+</head>
+<body>
+    <h1>Retail Chatbot</h1>
+    <p>Ask me for product suggestions in tech, fashion, or home goods!</p>
+    <div id="chatbox"></div>
+    <div id="input-area">
+        <input id="input" type="text" placeholder="E.g., 'Suggest a gift for a gamer'" autofocus>
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        const chatbox = document.getElementById('chatbox');
+        const input = document.getElementById('input');
+        let isProcessing = false;
+
+        async function sendMessage() {
+            const message = input.value.trim();
+            if (!message || isProcessing) return;
+
+            // Show user message
+            chatbox.innerHTML += `<p><b>You:</b> ${message}</p>`;
+            input.value = '';
+            chatbox.scrollTop = chatbox.scrollHeight;
+
+            // Add waiting indicator
+            const waitingId = `waiting-${Date.now()}`;
+            chatbox.innerHTML += `<p id="${waitingId}" class="waiting">Bot is thinking...</p>`;
+            chatbox.scrollTop = chatbox.scrollHeight;
+            isProcessing = true;
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                const data = await response.json();
+                console.log("Response from server:", data);  // Debug
+
+                // Remove waiting indicator
+                document.getElementById(waitingId).remove();
+
+                if (data.error) {
+                    chatbox.innerHTML += `<p><b>Bot:</b> Error: ${data.error}</p>`;
+                } else {
+                    chatbox.innerHTML += `<p><b>Bot:</b> ${data.response}</p>`;
+                }
+            } catch (error) {
+                document.getElementById(waitingId).remove();
+                chatbox.innerHTML += `<p><b>Bot:</b> Oops, something broke! Try again.</p>`;
+            }
+
+            chatbox.scrollTop = chatbox.scrollHeight;
+            isProcessing = false;
+        }
+
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>
