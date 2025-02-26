@@ -3,7 +3,7 @@ import json
 import time
 import random
 
-p = Producer({'bootstrap.servers': 'localhost:9092'})
+p = Producer({'bootstrap.servers': 'localhost:9093'})
 products = ["Wireless Earbuds", "Smartwatch", "Leather Jacket", "LED Desk Lamp"]
 
 while True:
