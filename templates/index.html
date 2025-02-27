@@ -16,11 +16,12 @@
 </head>
 <body>
     <h1>Retail Chatbot</h1>
-    <p>Ask me for product suggestions in tech, fashion, or home goods!</p>
+    <p>Ask me for product suggestions in tech, fashion, or home goods—type or speak!</p>
     <div id="chatbox"></div>
     <div id="input-area">
         <input id="input" type="text" placeholder="E.g., 'Suggest a gift for a gamer'" autofocus>
         <button onclick="sendMessage()">Send</button>
+        <button onclick="sendVoice()">Voice</button>
     </div>
 
     <script>
@@ -32,12 +33,10 @@
             const message = input.value.trim();
             if (!message || isProcessing) return;
 
-            // Show user message
             chatbox.innerHTML += `<p><b>You:</b> ${message}</p>`;
             input.value = '';
             chatbox.scrollTop = chatbox.scrollHeight;
 
-            // Add waiting indicator
             const waitingId = `waiting-${Date.now()}`;
             chatbox.innerHTML += `<p id="${waitingId}" class="waiting">Bot is thinking...</p>`;
             chatbox.scrollTop = chatbox.scrollHeight;
@@ -50,23 +49,62 @@
                     body: JSON.stringify({ message })
                 });
                 const data = await response.json();
-                console.log("Response from server:", data);  // Debug
-
-                // Remove waiting indicator
                 document.getElementById(waitingId).remove();
-
-                if (data.error) {
-                    chatbox.innerHTML += `<p><b>Bot:</b> Error: ${data.error}</p>`;
-                } else {
-                    chatbox.innerHTML += `<p><b>Bot:</b> ${data.response}</p>`;
-                }
+                if (data.error) throw new Error(data.error);
+                chatbox.innerHTML += `<p><b>Bot:</b> ${data.response}</p>`;
             } catch (error) {
                 document.getElementById(waitingId).remove();
                 chatbox.innerHTML += `<p><b>Bot:</b> Oops, something broke! Try again.</p>`;
             }
-
             chatbox.scrollTop = chatbox.scrollHeight;
             isProcessing = false;
+        }
+
+        async function sendVoice() {
+            if (isProcessing) return;
+            const listeningId = `listening-${Date.now()}`;
+            chatbox.innerHTML += `<p id="${listeningId}" class="waiting">Listening...</p>`;
+            chatbox.scrollTop = chatbox.scrollHeight;
+            isProcessing = true;
+
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'en-US';
+            recognition.start();
+
+            recognition.onresult = async (event) => {
+                const user_input = event.results[0][0].transcript;
+                document.getElementById(listeningId).innerHTML = `<p><b>You (voice):</b> ${user_input}</p>`;
+                
+                const waitingId = `waiting-${Date.now()}`;
+                chatbox.innerHTML += `<p id="${waitingId}" class="waiting">Bot is thinking...</p>`;
+                chatbox.scrollTop = chatbox.scrollHeight;
+
+                try {
+                    const response = await fetch('/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: user_input })
+                    });
+                    const data = await response.json();
+                    document.getElementById(waitingId).remove();
+                    if (data.error) throw new Error(data.error);
+                    chatbox.innerHTML += `<p><b>Bot:</b> ${data.response}</p>`;
+                    const utterance = new SpeechSynthesisUtterance(data.response);
+                    window.speechSynthesis.speak(utterance);
+                } catch (error) {
+                    document.getElementById(waitingId).remove();
+                    chatbox.innerHTML += `<p><b>Bot:</b> Oops, something broke! ${error.message}</p>`;
+                }
+                chatbox.scrollTop = chatbox.scrollHeight;
+                isProcessing = false;
+            };
+
+            recognition.onerror = (event) => {
+                document.getElementById(listeningId).remove();
+                chatbox.innerHTML += `<p><b>Bot:</b> Voice error: ${event.error}</p>`;
+                chatbox.scrollTop = chatbox.scrollHeight;
+                isProcessing = false;
+            };
         }
 
         input.addEventListener('keypress', (e) => {
