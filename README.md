@@ -1,41 +1,41 @@
 # Retail Chatbot with DeepSeek-R1
 
-A generative AI-powered retail chatbot built with DeepSeek-R1, showcasing autonomous agents from "The Rise of Generative AI Agents: Transforming Industries in 2025." It suggests products (tech, fashion, home goods) and answers FAQs using *in-context learning*. Now enhanced with Kafka and IoT for real-time inventory updates!
+A generative AI-powered retail chatbot built with DeepSeek-R1, inspired by "The Rise of Generative AI Agents: Transforming Industries in 2025." Three flavors: a lightweight base (`main`), IoT/Kafka-enhanced (`kafka-iot-extension`), and now a voice-enabled, concise version (`voice-interface`).
 
-![Chatbot Demo]
- ![alt text](image.png)
-*Suggesting a tech gift with live stock info from Kafka.*
+![Chatbot Demo](demo_screenshot.png)  
+
+*Voice input/output with real-time Kafka stock (voice-interface).*
+
+## Branches
+- **`main`**: Core chatbot with static product/FAQ data—simple and standalone.
+- **`kafka-iot-extension`**: Adds real-time inventory via Kafka and IoT-like producers.
+- **`voice-interface`**: Adds voice input/output and concise responses.
 
 ## Features
-- **Product Suggestions**: Recommends from a curated list (e.g., Wireless Earbuds, $49.99).
-- **FAQ Answers**: Handles queries like “What’s your return policy?”.
-- **In-Context Learning**: Adapts to a custom dataset via prompts—no fine-tuning needed.
-- **Real-Time Inventory (New!)**: Kafka streams live stock updates from IoT-like producers.
-- **Responsive UI**: Shows “Bot is thinking...” during processing delays.
-- **Cost-Optimized**: Runs locally with Ollama (zero API cost) or on AWS (~$0.30/hour with GPU).
+### Base Chatbot (main)
+- Product suggestions from a static list (e.g., Wireless Earbuds, $49.99).
+- FAQ answers (e.g., “What’s your return policy?”).
+- In-context learning with DeepSeek-R1—no fine-tuning.
+
+### Kafka + IoT Extension (kafka-iot-extension)
+- Real-time inventory streaming via Kafka (e.g., “5 Smartwatches in stock”).
+
+### Voice Interface (voice-interface)
+- All above, plus:
+- Voice input (STT) and output (TTS) via browser Web Speech API.
+- Concise responses—no reasoning, just the answer (e.g., “Smartwatch, $129.99, fitness tracking, waterproof”).
 
 ## Tech Stack
-- **LLM**: DeepSeek-R1 (7B params) via Ollama
+- **LLM**: DeepSeek-R1 (7B) via Ollama
 - **Backend**: Flask (Python)
-- **Frontend**: HTML/JavaScript
-- **Streaming**: Apache Kafka (with Zookeeper)
-- **Container**: Docker (handles all dependencies—no virtual env required)
+- **Frontend**: HTML/JavaScript (Web Speech API for voice)
+- **Streaming**: Apache Kafka + Zookeeper
+- **Container**: Docker
 
 ## Setup (Local with Docker)
-1. **Prerequisites**:
-   - Docker Desktop installed ([Download](https://www.docker.com/products/docker-desktop/))
-   - 8GB+ RAM (16GB+ recommended for smoother CPU inference)
-   - Windows/macOS/Linux
-2. **Clone the Repo**:
+### Base Chatbot (main)
+1. **Clone and Switch**:
    ```bash
-   git clone https://github.com/yourusername/retail-chatbot.git
-3. **Run the App**
-   cd retail_chatbot
-   docker build -t retail-chatbot .
-   docker run -d -p 5000:5000 retail-chatbot
-4. **Test the App**
-   Open http://localhost:5000
-   Try: “Suggest a tech gift under $50” or “What’s your return policy?”
-   Note: CPU inference may take 5-15s per reply; GPU (e.g., AWS) drops to 1-2s.
-
-
+   git clone https://github.com/dbh/retail-chatbot.git
+   cd retail-chatbot
+   git checkout main
